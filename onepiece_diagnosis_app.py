@@ -1,38 +1,60 @@
-
 import streamlit as st
 
-st.title("ワンピースキャラ診断 × あなたに向いてる職業")
+st.title("MBTI風 性格診断 × 向いている職業")
+st.markdown("12の質問に答えて、あなたの性格タイプと向いている職業を診断しましょう！")
 
-st.markdown("以下の質問に答えて、あなたに似たワンピースキャラと向いてる職業を診断しよう！")
+# 初期化（4軸 × 2タイプ）
+scores = {
+    "E": 0, "I": 0,
+    "S": 0, "N": 0,
+    "T": 0, "F": 0,
+    "J": 0, "P": 0,
+}
 
-q1 = st.radio("Q1. 困っている仲間がいたら？", ["A: すぐに動く", "B: 作戦を立てる", "C: とにかく励ます"])
-q2 = st.radio("Q2. 目標に向かって努力できる？", ["A: コツコツやれる", "B: 無理せず工夫する"])
-q3 = st.radio("Q3. 人前で話すのは？", ["A: 得意", "B: 苦手"])
-q4 = st.radio("Q4. あなたの強みは？", ["A: 情熱と行動力", "B: 頭の良さと分析力", "C: 優しさと気配り", "D: 表現力"])
+# 質問（MBTI形式）
+questions = [
+    ("大人数の集まりは楽しい？", "E", "I"),
+    ("一人の時間が大切？", "I", "E"),
+    ("事実や経験を重視する？", "S", "N"),
+    ("アイデアや可能性を大切にする？", "N", "S"),
+    ("論理的な説明に納得しやすい？", "T", "F"),
+    ("他人の気持ちに影響されやすい？", "F", "T"),
+    ("物事は計画通りに進めたい？", "J", "P"),
+    ("状況に応じて柔軟に動きたい？", "P", "J"),
+    ("初対面でもすぐ話せる？", "E", "I"),
+    ("細かいことより全体像を重視？", "N", "S"),
+    ("対立しても正しいと思えば主張する？", "T", "F"),
+    ("予定よりも流れに任せたい？", "P", "J"),
+]
 
-if st.button("診断する"):
-    if q1.startswith("A") and q4 == "A: 情熱と行動力":
-        character = "ルフィ"
-        job = "営業職・起業家・店舗マネージャー"
-    elif q1.startswith("B") and q4 == "B: 頭の良さと分析力":
-        character = "ナミ"
-        job = "経理・事務職・マーケティング"
-    elif q4 == "C: 優しさと気配り":
-        character = "チョッパー"
-        job = "看護助手・医療福祉系・保育士"
-    elif q4 == "D: 表現力":
-        character = "ウソップ"
-        job = "クリエイター・コピーライター・広告"
-    elif q2.startswith("A") and q3.startswith("B"):
-        character = "ゾロ"
-        job = "職人・整備士・施工管理"
-    elif q2.startswith("B") and q3.startswith("A"):
-        character = "ブルック"
-        job = "アーティスト・音楽・舞台系"
+# 質問を表示
+for idx, (q, a_type, b_type) in enumerate(questions):
+    answer = st.radio(f"Q{idx+1}. {q}", ["はい", "いいえ"], key=q)
+    if answer == "はい":
+        scores[a_type] += 1
     else:
-        character = "ロビン"
-        job = "研究職・司書・法務"
+        scores[b_type] += 1
 
-    st.subheader("🎉 診断結果 🎉")
-    st.markdown(f"あなたは **{character} タイプ**！")
-    st.markdown(f"向いている職業は：**{job}**")
+# 診断結果表示
+if st.button("診断する"):
+    mbti = ""
+    mbti += "E" if scores["E"] >= scores["I"] else "I"
+    mbti += "S" if scores["S"] >= scores["N"] else "N"
+    mbti += "T" if scores["T"] >= scores["F"] else "F"
+    mbti += "J" if scores["J"] >= scores["P"] else "P"
+
+    job_map = {
+        "ESTJ": "営業・管理職・プロジェクトマネージャー",
+        "INFP": "カウンセラー・ライター・福祉職",
+        "ENTP": "マーケター・企画職・起業家",
+        "ISFJ": "事務職・看護師・学校職員",
+        "INTJ": "エンジニア・研究職・戦略系コンサル",
+        "ESFP": "接客業・イベント企画・芸能系",
+        "ISTJ": "会計・行政職・技術職",
+        "ENFP": "教育職・人材・SNSクリエイター"
+    }
+    job = job_map.get(mbti, "さまざまな分野で活躍できます！")
+
+    st.subheader("🎯 診断結果")
+    st.markdown(f"あなたの性格タイプは **{mbti} タイプ** です。")
+    st.markdown(f"向いている職業：**{job}**")
